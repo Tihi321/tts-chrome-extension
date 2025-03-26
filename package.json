@@ -1,0 +1,8 @@
+{
+  "name": "tts-chrome-extension",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Tihi321/tts-chrome-extension.git",
+  "author": "Tihomir Selak <tknox.dr@gmail.com>",
+  "license": "MIT"
+}

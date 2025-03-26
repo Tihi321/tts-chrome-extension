@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "TTS Extension",
+  "version": "1.0",
+  "description": "Send selected text to a TTS server",
+  "permissions": ["contextMenus", "activeTab", "scripting"],
+  "action": {
+    "default_icon": "icons/icon.svg",
+    "default_title": "TTS Extension"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  }
+}
