@@ -9,6 +9,12 @@ body {
   padding: 16px;
 }
 
+.form-container {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
 h1 {
   font-size: 18px;
   margin-top: 0;
@@ -25,6 +31,7 @@ h2 {
 
 .form-group {
   margin-bottom: 12px;
+  flex: 1;
 }
 
 label {

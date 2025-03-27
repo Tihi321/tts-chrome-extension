@@ -4,7 +4,8 @@ let isConnected = false;
 let isReaderConnected = false;
 
 // DOM Elements
-let portInput;
+let edgePortInput;
+let apiPortInput;
 let connectButton;
 let connectionStatus;
 let readerStatus; 
@@ -14,17 +15,21 @@ let sendEdgeButton;
 // Initialize popup when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   // Get DOM elements
-  portInput = document.getElementById("port");
+  edgePortInput = document.getElementById("edge-port");
+  apiPortInput = document.getElementById("api-port");
   connectButton = document.getElementById("connect-btn");
   connectionStatus = document.getElementById("connection-status");
   readerStatus = document.getElementById("reader-status");
   sendLocalButton = document.getElementById("send-local");
   sendEdgeButton = document.getElementById("send-edge");
 
-  // Load saved port
-  chrome.storage.sync.get(["wsPort"], (result) => {
+  // Load saved ports
+  chrome.storage.sync.get(["wsPort", "apiPort"], (result) => {
     if (result.wsPort) {
-      portInput.value = result.wsPort;
+      edgePortInput.value = result.wsPort;
+    }
+    if (result.apiPort) {
+      apiPortInput.value = result.apiPort;
     }
   });
 
@@ -33,6 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (response) {
       isConnected = !!response.isConnected;
       isReaderConnected = !!response.isReaderConnected;
+      
+      // Update API port from background if available
+      if (response.apiPort) {
+        apiPortInput.value = response.apiPort;
+      }
+      
       updateConnectionStatus();
       updateReaderStatus();
     }
@@ -46,10 +57,20 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeEventListeners() {
   // Connect button click handler
   connectButton.addEventListener("click", async () => {
-    const port = portInput.value;
+    const edgePort = edgePortInput.value;
+    const apiPort = apiPortInput.value;
 
-    // Save port to storage
-    chrome.storage.sync.set({ wsPort: port });
+    // Save edge port to storage and connect
+    chrome.storage.sync.set({ wsPort: edgePort });
+    
+    // Save API port to storage
+    chrome.storage.sync.set({ apiPort: apiPort });
+    
+    // Tell background script about the new API port
+    chrome.runtime.sendMessage({ 
+      action: "setApiPort", 
+      port: apiPort
+    });
 
     if (isConnected) {
       // Disconnect if already connected
@@ -64,7 +85,7 @@ function initializeEventListeners() {
     // Connect using background script
     chrome.runtime.sendMessage({
       action: "connectEdge",
-      port: port
+      port: edgePort
     });
 
     // Check connection status after a delay
@@ -77,11 +98,25 @@ function initializeEventListeners() {
           updateReaderStatus();
           
           if (!isConnected) {
-            alert(`Failed to connect to WebSocket server at localhost:${port}`);
+            alert(`Failed to connect to WebSocket server at localhost:${edgePort}`);
           }
         }
       });
     }, 1000);
+  });
+
+  // API port change handler - save immediately
+  apiPortInput.addEventListener("change", () => {
+    const apiPort = apiPortInput.value;
+    
+    // Save API port to storage
+    chrome.storage.sync.set({ apiPort: apiPort });
+    
+    // Tell background script about the new API port
+    chrome.runtime.sendMessage({ 
+      action: "setApiPort", 
+      port: apiPort
+    });
   });
 
   // Send to Local TTS button click handler

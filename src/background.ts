@@ -7,6 +7,7 @@ export {};
 let websocket: WebSocket | null = null;
 let isConnected = false;
 let isReaderConnected = false;
+let apiPort = "7891"; // Default API port
 
 // Create context menu items
 chrome.runtime.onInstalled.addListener(() => {
@@ -32,10 +33,15 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ["selection"],
   });
 
-  // Initialize connection state
-  chrome.storage.sync.get(["wsPort"], (result) => {
+  // Initialize connection state and ports
+  chrome.storage.sync.get(["wsPort", "apiPort"], (result) => {
+    // Set API port from storage or use default
+    if (result.apiPort) {
+      apiPort = result.apiPort;
+    }
+
+    // Try to connect with saved WebSocket port
     if (result.wsPort) {
-      // Try to connect with saved port
       connectToWebSocket(result.wsPort);
     }
   });
@@ -116,9 +122,12 @@ function connectToWebSocket(port: string): void {
   }
 }
 
-// Send text to local TTS
+// Send text to local TTS using the configured API port
 function sendToLocalTTS(text: string): void {
-  fetch("http://127.0.0.1:7891/tts", {
+  const url = `http://127.0.0.1:${apiPort}/tts`;
+  console.log(`Sending text to local TTS at ${url}`);
+
+  fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -135,7 +144,7 @@ function sendToLocalTTS(text: string): void {
       console.log("Local TTS response:", data);
     })
     .catch((error) => {
-      console.error("Error sending to local TTS:", error);
+      console.error(`Error sending to local TTS at ${url}:`, error);
     });
 }
 
@@ -189,6 +198,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.sync.set({ wsPort: message.port });
 
     sendResponse({ success: true });
+  } else if (message.action === "setApiPort" && message.port) {
+    // Save API port to storage and update local variable
+    apiPort = message.port;
+    chrome.storage.sync.set({ apiPort: message.port });
+
+    sendResponse({ success: true });
   } else if (message.action === "disconnectEdge") {
     if (websocket) {
       websocket.close();
@@ -202,6 +217,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({
       isConnected,
       isReaderConnected,
+      apiPort,
     });
 
     return true; // Keep message channel open for async response
