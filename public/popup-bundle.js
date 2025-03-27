@@ -11,6 +11,7 @@ let connectionStatus;
 let readerStatus; 
 let sendLocalButton;
 let sendEdgeButton;
+let stopLocalButton;
 
 // Initialize popup when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   readerStatus = document.getElementById("reader-status");
   sendLocalButton = document.getElementById("send-local");
   sendEdgeButton = document.getElementById("send-edge");
+  stopLocalButton = document.getElementById("stop-local");
 
   // Load saved ports
   chrome.storage.sync.get(["wsPort", "apiPort"], (result) => {
@@ -130,6 +132,13 @@ function initializeEventListeners() {
     } else {
       alert("Please select some text first.");
     }
+  });
+
+  // Stop Local TTS button click handler
+  stopLocalButton.addEventListener("click", () => {
+    chrome.runtime.sendMessage({
+      action: "stopLocalTTS"
+    });
   });
 
   // Send to Edge TTS button click handler

@@ -109,12 +109,31 @@ button:disabled {
   margin-bottom: 8px;
 }
 
+.button-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.button-row .action-btn {
+  flex: 1;
+  margin-bottom: 0;
+}
+
 #send-local {
   background-color: #0f9d58;
 }
 
 #send-local:hover {
   background-color: #0b8043;
+}
+
+#stop-local {
+  background-color: #db4437;
+}
+
+#stop-local:hover {
+  background-color: #c53929;
 }
 
 #send-edge {

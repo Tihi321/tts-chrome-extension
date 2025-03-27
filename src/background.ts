@@ -15,7 +15,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "tts-parent",
     title: "Text-to-Speech",
-    contexts: ["selection"],
+    contexts: ["all"],
   });
 
   // Create submenu items
@@ -24,6 +24,13 @@ chrome.runtime.onInstalled.addListener(() => {
     parentId: "tts-parent",
     title: "Send to Local TTS",
     contexts: ["selection"],
+  });
+
+  chrome.contextMenus.create({
+    id: "tts-stop-local",
+    parentId: "tts-parent",
+    title: "Stop Local TTS",
+    contexts: ["all"],
   });
 
   chrome.contextMenus.create({
@@ -148,6 +155,32 @@ function sendToLocalTTS(text: string): void {
     });
 }
 
+// Stop local TTS playback
+function stopLocalTTS(): void {
+  const url = `http://127.0.0.1:${apiPort}/stop`;
+  console.log(`Stopping local TTS at ${url}`);
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Local TTS stop response:", data);
+    })
+    .catch((error) => {
+      console.error(`Error stopping local TTS at ${url}:`, error);
+    });
+}
+
 // Send text to Edge TTS
 function sendToEdgeTTS(text: string): void {
   if (!websocket || websocket.readyState !== WebSocket.OPEN) {
@@ -170,7 +203,19 @@ function sendToEdgeTTS(text: string): void {
 
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (!info.selectionText) return;
+  // Handle stop function regardless of text selection
+  if (info.menuItemId === "tts-stop-local") {
+    stopLocalTTS();
+    return;
+  }
+
+  // For sending text, we need selected text
+  if (!info.selectionText) {
+    if (info.menuItemId === "tts-local" || info.menuItemId === "tts-edge") {
+      alert("Please select some text first.");
+    }
+    return;
+  }
 
   if (info.menuItemId === "tts-local") {
     sendToLocalTTS(info.selectionText);
@@ -223,6 +268,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; // Keep message channel open for async response
   } else if (message.action === "sendToLocalTTS" && message.text) {
     sendToLocalTTS(message.text);
+    sendResponse({ success: true });
+  } else if (message.action === "stopLocalTTS") {
+    stopLocalTTS();
     sendResponse({ success: true });
   } else if (message.action === "sendToEdgeTTS" && message.text) {
     if (isConnected && isReaderConnected) {
