@@ -1,6 +1,18 @@
 {
   "name": "tts-chrome-extension",
   "version": "1.0.0",
+  "description": "A Chrome extension that sends selected text to a local TTS server",
+  "scripts": {
+    "build": "tsc && yarn copy-files",
+    "copy-files": "copyfiles -u 1 \"public/**/*\" dist && copyfiles manifest.json dist",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.260",
+    "copyfiles": "^2.4.1",
+    "typescript": "^5.3.3"
+  },
   "main": "index.js",
   "repository": "git@github.com:Tihi321/tts-chrome-extension.git",
   "author": "Tihomir Selak <tknox.dr@gmail.com>",
