@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTS Extension</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>TTS Settings</h1>
+    
+    <div class="form-group">
+      <label for="port">WebSocket Port:</label>
+      <input type="number" id="port" value="7123" min="1" max="65535">
+    </div>
+    
+    <div class="connection-controls">
+      <button id="connect-btn">Connect</button>
+      <span id="connection-status" class="status disconnected">Disconnected</span>
+    </div>
+    
+    <div class="reader-status">
+      <span class="status-label">Reader service:</span>
+      <span id="reader-status" class="status disconnected">Not connected</span>
+    </div>
+    
+    <div class="actions">
+      <h2>Selected Text Actions</h2>
+      <button id="send-local" class="action-btn">Send to Local TTS</button>
+      <button id="send-edge" class="action-btn" disabled>Send to Edge TTS</button>
+    </div>
+  </div>
+  <script src="popup-bundle.js"></script>
+</body>
+</html> 

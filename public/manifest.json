@@ -3,14 +3,18 @@
   "name": "TTS Extension",
   "version": "1.0",
   "description": "Send selected text to a TTS server",
-  "permissions": ["contextMenus", "activeTab", "scripting"],
+  "permissions": ["contextMenus", "activeTab", "scripting", "storage"],
   "action": {
     "default_icon": "icons/icon.svg",
-    "default_title": "TTS Extension"
+    "default_title": "TTS Extension",
+    "default_popup": "popup.html"
   },
   "background": {
     "service_worker": "background.js",
     "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "icons": {
     "48": "icons/icon.svg",
